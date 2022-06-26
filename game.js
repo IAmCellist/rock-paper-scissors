@@ -1,26 +1,82 @@
+let playerWins = 0;
+let computerWins = 0;
 
-game();
+const body = document.querySelector("body");
+const playerDiv = document.querySelector(".player");
+const compDiv = document.querySelector(".computer");
 
-function game() {
-    let playerWins = 0;
-    let computerWins = 0;
-    while (playerWins < 5 && computerWins < 5) {
-        let playerSelection = prompt("Please choose rock, paper, or scissors: ");
-        let roundResult = playRound(playerSelection.toLowerCase(), computerPlay());
-        if (roundResult === "win") {
-            playerWins++;
+const score = document.querySelector(".score");
+const compScore = document.querySelector(".compScore");
+const playerScore = document.querySelector(".playerScore");
+compScore.textContent = `${computerWins}`;
+playerScore.textContent = ` ${playerWins}`;
+
+playerDiv.append(playerScore);
+compDiv.append(compScore);
+body.appendChild(score);
+
+const playerIcon = document.querySelector(".playerIcon");
+const compIcon = document.querySelector(".compIcon");
+
+playerDiv.appendChild(playerIcon);
+compDiv.appendChild(compIcon);
+
+const content = document.querySelector(".content");
+const roundText = document.querySelector(".roundText");
+
+const rockButton = document.querySelector(".rock");
+rockButton.addEventListener("click", () => playRound("rock", computerPlay()));
+
+const paperButton = document.querySelector(".paper");
+paperButton.addEventListener("click", () => playRound("paper", computerPlay()));
+
+const scissorsButton = document.querySelector(".scissors");
+scissorsButton.addEventListener("click", () => playRound("scissors", computerPlay()));
+
+body.appendChild(roundText);
+content.append(rockButton, paperButton, scissorsButton);
+body.appendChild(content);
+
+const overlay = document.getElementById("overlay");
+const h3overlay = document.getElementById("h3overlay");
+const reset = document.getElementById("reset");
+
+reset.addEventListener("click", () => resetGame());
+
+overlay.append(h3overlay, reset);
+body.append(overlay);
+
+const footer = document.querySelector(".footer");
+body.appendChild(footer);
+
+function overlayOn() {
+    document.getElementById("overlay").setAttribute("style","display: flex;");
+}
+
+function overlayOff() {
+    document.getElementById("overlay").setAttribute("style", "display: none;");
+}
+
+function checkGame() {
+    if (playerWins === 5 || computerWins === 5) {
+        overlayOn();
+        if (playerWins === 5) {
+            h3overlay.textContent = "Player wins!";
         }
-        if (roundResult === "lose") {
-            computerWins++;
+        if (computerWins == 5) {
+            h3overlay.textContent = "Computer wins!";
         }
+        
     }
+}
 
-    if (playerWins === 5) {
-        alert("Player wins! Congrats!");
-    }
-    else {
-        alert("Computer wins! Better luck next time!");
-    }
+function resetGame() {
+    playerWins = 0;
+    playerScore.textContent = `${playerWins}`;
+    computerWins = 0;
+    compScore.textContent = `${computerWins}`;
+    roundText.textContent = "Choose your move!";
+    overlayOff();
 }
 
 /* Randomly chooses an integer between 0 and 2 (inclusive)
@@ -32,20 +88,64 @@ function computerPlay() {
         return "rock";
     }
     if (compChoice === 1) {
+        compIcon.textContent = String.fromCodePoint(128196);
         return "paper";
     }
+    compIcon.textContent = String.fromCodePoint(0x2702);
     return "scissors";
 }
 
 /* Plays a round of rock, paper, scissors.
 */
 function playRound(playerSelection, computerSelection) {
+    displayIcon(playerSelection, true);
+    displayIcon(computerSelection, false);
+    let roundResult = "";
     if (playerSelection === computerSelection) {
-        alert("Tie!");
-        return "tie";
+        roundResult = "tie";
     }
     else {
-        return compareSelection(playerSelection, computerSelection);
+        roundResult = compareSelection(playerSelection, computerSelection);
+        updateScore(roundResult);
+    }
+    updateRoundText(roundResult, playerSelection, computerSelection);
+    checkGame();
+}
+
+function displayIcon(choice, player) {
+    if (player) {
+        if (choice === "rock") playerIcon.textContent = String.fromCodePoint(129704);
+        if (choice === "paper") playerIcon.textContent = String.fromCodePoint(128196); 
+        if (choice === "scissors") playerIcon.textContent = String.fromCodePoint(0x2702); 
+    }
+    else {
+        if (choice === "rock") compIcon.textContent = String.fromCodePoint(129704);
+        if (choice === "paper") compIcon.textContent = String.fromCodePoint(128196); 
+        if (choice === "scissors") compIcon.textContent = String.fromCodePoint(0x2702); 
+    }
+
+}
+
+function updateScore(roundResult, playerSelection, computerSelection) {
+    if (roundResult === "win") {
+        playerWins++;
+        playerScore.textContent = `${playerWins}`;
+    }
+    if (roundResult === "lose") {
+        computerWins++;
+        compScore.textContent = `${computerWins}`;
+    }
+}
+
+function updateRoundText(roundResult, playerSelection, computerSelection) {
+    if (roundResult === "win") {
+        roundText.textContent = `Win, ${playerSelection} beats ${computerSelection}!`;
+    }
+    if (roundResult === "lose") {
+        roundText.textContent = `Lose, ${computerSelection} beats ${playerSelection}!`;
+    }
+    if (roundResult === "tie") {
+        roundText.textContent = "Tie!";
     }
 }
 
@@ -56,32 +156,26 @@ function compareSelection(playerSelection, computerSelection) {
     switch(playerSelection) {
         case "rock":
             if (computerSelection === "paper") {
-                alert("Paper beats rock, you lose!");
                 return "lose";
             }
             if (computerSelection === "scissors") {
-                alert("Rock beats scissors, you win!");
                 return "win";
             }   
             break;
                 
         case "paper":
             if (computerSelection === "rock") {
-                alert("Paper beats rock, you win!");
                 return "win";
             }
             if (computerSelection === "scissors") {
-                alert("Scissors beats paper, you lose!");
                 return "lose"
             }
             break;
         case "scissors":
             if (computerSelection === "rock") {
-                alert("Rock beats scissors, you lose!");
                 return "lose";
             }
             if (computerSelection === "paper") {
-                alert("Scissors beats paper, you win!");
                 return "win";
             }
             break;
